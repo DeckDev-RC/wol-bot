@@ -1,10 +1,10 @@
 {
-  "name": "wol-bot",
-  "version": "1.0.0",
+  "name": "wol-automation-controller",
+  "version": "2.0.0",
   "type": "module",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node --env-file=.env bot.js"
   },
   "dependencies": {
     "node-telegram-bot-api": "^0.66.0",
