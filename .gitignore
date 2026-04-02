@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Environment (secrets — use o painel / variáveis do host)
+.env
+.env.*
+!.env.example
+
+# Logs / debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
