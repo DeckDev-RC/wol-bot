@@ -46,7 +46,7 @@ async function agentFetch(method, path, body = null) {
   const opts = {
     method,
     headers: { 'X-Agent-Key': AGENT_KEY, 'Content-Type': 'application/json' },
-    signal: AbortSignal.timeout(10000),
+    signal: AbortSignal.timeout(30000),
   };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`${AGENT_URL}${path}`, opts);
@@ -54,7 +54,10 @@ async function agentFetch(method, path, body = null) {
 }
 
 async function agentReady() {
-  try { return (await agentFetch('GET', '/health')).status === 'ok'; }
+  try {
+    const data = await agentFetch('GET', '/health');
+    return data.status === 'ok' && data.ready === true;
+  }
   catch { return false; }
 }
 
@@ -181,7 +184,7 @@ async function smartRun(chatId, msgId, jobId, runtimeConfig = null) {
     await update(`✅ PC respondeu! Esperando agent...`);
   }
 
-  const ready = await waitFor(agentReady, 60000);
+  const ready = await waitFor(agentReady, 120000);
   if (!ready) return update(`❌ Agent não respondeu. Verifique se está rodando no PC.`);
 
   await update(`🔓 Desbloqueando tela...`);
@@ -307,10 +310,16 @@ bot.on('callback_query', async (query) => {
   if (data === 'status') {
     await editMsg(chatId, msgId, '🔍 Verificando...', kb.back);
     const online = await pingPC();
-    let agentOk = false;
-    if (online) agentOk = await agentReady();
+    let agentStatus = '🔴 Offline';
+    if (online) {
+      try {
+        const health = await agentFetch('GET', '/health');
+        if (health.status === 'ok' && health.ready) agentStatus = '🟢 Pronto';
+        else if (health.status === 'ok') agentStatus = '🟡 Carregando...';
+      } catch { /* offline */ }
+    }
     const text = online
-      ? `🖥 PC: 🟢 Online\n🤖 Agent: ${agentOk ? '🟢 Pronto' : '🔴 Offline'}`
+      ? `🖥 PC: 🟢 Online\n🤖 Agent: ${agentStatus}`
       : '🖥 PC: 🔴 Offline';
     return editMsg(chatId, msgId, text, kb.main);
   }
