@@ -1,5 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
-import wol from 'wol';
+import jswol from 'wol';
 
 const TOKEN = process.env.BOT_TOKEN;
 const ALLOWED_CHAT_ID = process.env.CHAT_ID;
@@ -30,7 +30,7 @@ bot.on('message', (msg) => {
   const text = msg.text?.toLowerCase();
 
   if (text === '/ligar') {
-    wol.wake(MAC, { address: BROADCAST }, (err) => {
+    jswol.wake(MAC, { address: '192.168.15.255', port: 9 }, (err) => {
       if (err) {
         bot.sendMessage(chatId, `❌ Erro: ${err.message}`);
       } else {
